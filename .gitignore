@@ -1,0 +1,73 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+tests/.tmp/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Hugging Face / model cache
+.cache/
+cache/
+hf_cache/
+wandb/
+runs/
+
+# Large raw datasets already present locally
+data/mobvoi_seq_monkey_general_open_corpus.jsonl
+data/mobvoi_seq_monkey_general_open_corpus.jsonl.tar.bz2
+data/BelleGroup/
+data/BelleGroup_sft.jsonl
+data/BelleGroup_sft_1k.jsonl
+data/.msc
+seq_monkey_datawhale.jsonl
+
+# Legacy Tiny LLM learning artifacts kept local for reference
+tiny_llm_legacy/
+tokenizer_k/
+
+# Generated datasets
+data/processed/
+data/raw/
+
+# Keep small curated samples if added later
+!data/samples/
+!data/samples/**
+
+# Model weights and training outputs
+base_model_215M/
+pretrain_model/
+sft_model_215M/
+outputs/
+checkpoints/
+models/
+*.pth
+*.pt
+*.bin
+*.safetensors
+*.ckpt
+
+# Experiment artifacts generated locally
+results/*.jsonl
+results/*.json
+results/*.csv
+assets/*.png
+assets/*.jpg
+assets/*.jpeg
