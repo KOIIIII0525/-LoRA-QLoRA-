@@ -20,8 +20,8 @@
 | 第 3 阶段 | 跑通 smoke test | 100 条数据训练成功 | 必须 | 已完成 |
 | 第 4 阶段 | 跑主实验 | 1k、3k LoRA/QLoRA 实验 | 必须 | 已完成 |
 | 第 5 阶段 | 做评估闭环 | loss、ppl、ROUGE-L、固定 prompt 对比 | 必须 | 已完成 |
-| 第 6 阶段 | GitHub 展示 | README、结果表、可复现命令、推理展示素材 | 必须 | 当前下一步 |
-| 第 7 阶段 | 加分实验 | 5k、rank 消融、Gradio | 可选 | 待开始 |
+| 第 6 阶段 | GitHub 展示 | README、结果表、可复现命令、推理展示素材 | 必须 | 已完成 |
+| 第 7 阶段 | 加分实验 | 展示微调、Demo、5k、rank 消融、Gradio | 可选 | 进行中 |
 
 ## 2026-05-28
 
@@ -757,3 +757,39 @@ base_model_215M/
 ### 当前状态
 
 第 6 阶段 GitHub 展示材料和提交边界已基本收尾。下一步可以按建议清单进行有意 staging，并在 staged 状态下再次检查 `git status --short`，确认没有模型、数据和完整实验产物进入提交。
+
+## 2026-05-31 第 6 阶段完成与第 7.1 启动
+
+### 第 6 阶段完成状态
+
+- 已完成首版 GitHub 提交：
+
+```text
+83ee7e5 Initial QLoRA instruction tuning project
+```
+
+- 已绑定远程仓库并推送到 `main`：
+
+```text
+https://github.com/KOIIIII0525/-LoRA-QLoRA-.git
+```
+
+- `git status -sb` 显示本地 `main` 已跟踪 `origin/main`，无未提交主线文件。
+- 首版提交不包含模型权重、原始大数据、`data/processed/`、`outputs/` 或完整 `results/*.json/jsonl`。
+- `tiny_llm_legacy/` 和 `tokenizer_k/` 已作为本地旧项目资料保留并忽略，不进入首版 GitHub。
+
+### 第 7.1 展示微调范围
+
+第 7 阶段先从轻量展示微调开始，不启动重训练，不引入新依赖。
+
+本轮 7.1 只做公开展示状态更新：
+
+- 更新 `README.md` 阶段表，标记第 6 阶段已完成，第 7 阶段作为可选加分项待推进。
+- 更新 `docs/progress.md` 阶段总览，记录首版 GitHub 推送完成。
+- 不新增或提交面试专用文档，避免把个人面试话术放入公开仓库。
+
+后续第 7 阶段建议继续按低风险优先级推进：
+
+1. 检查 GitHub 页面 README 渲染效果和仓库描述。
+2. 视需要做本地 Demo 增强，但不提交模型或 adapter 权重。
+3. 如果时间充足，再考虑 5k 数据或 LoRA rank 消融等重实验。

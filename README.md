@@ -28,7 +28,8 @@
 | 第 3 阶段 | `train_100` QLoRA smoke test | 已完成 |
 | 第 4 阶段 | `train_1k` / `train_3k` 主实验 | 已完成 |
 | 第 5 阶段 | 推理、评估、固定 prompt 对比、人工分析 | 已完成 |
-| 第 6 阶段 | GitHub 展示材料整理 | 进行中 |
+| 第 6 阶段 | GitHub 展示材料整理与首版提交 | 已完成 |
+| 第 7 阶段 | 加分项：展示微调、Demo 或扩展实验 | 可选，待开始 |
 
 详细进度见 [docs/progress.md](docs/progress.md)。
 
