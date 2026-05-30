@@ -19,6 +19,13 @@ class TrainLoraConfigTest(unittest.TestCase):
         self.assertEqual(config["data"]["max_seq_len"], 512)
         self.assertEqual(config["lora"]["r"], 8)
 
+    def test_rank4_ablation_config_uses_isolated_output_dir(self):
+        config = load_training_config("configs/lora_qwen_0.5b_rank4.yaml")
+
+        self.assertEqual(config["lora"]["r"], 4)
+        self.assertEqual(config["lora"]["alpha"], 8)
+        self.assertEqual(config["training"]["output_dir"], "outputs/qwen05b_qlora_3k_r4")
+
     def test_resolve_training_inputs_accepts_explicit_train_100_for_smoke(self):
         config = load_training_config("configs/lora_qwen_0.5b.yaml")
 

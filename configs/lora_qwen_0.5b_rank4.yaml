@@ -1,0 +1,60 @@
+# Rank-4 ablation config for RTX 3060 Laptop 6GB.
+# Keep all major settings aligned with lora_qwen_0.5b.yaml; only LoRA rank/alpha
+# and output paths change, so r=4 can be compared against the completed r=8 run.
+
+project:
+  name: lightweight-chinese-instruction-tuning-rank4
+  seed: 42
+
+model:
+  base_model_name_or_path: models/qwen2.5-0.5b-instruct
+  trust_remote_code: true
+  torch_dtype: float16
+  use_qlora: true
+  load_in_4bit: true
+
+data:
+  source_file: data/BelleGroup_sft.jsonl
+  output_dir: data/processed
+  train_100: data/processed/train_100.jsonl
+  train_1k: data/processed/train_1k.jsonl
+  train_3k: data/processed/train_3k.jsonl
+  valid_300: data/processed/valid_300.jsonl
+  test_100: data/processed/test_100.jsonl
+  manual_prompts_30: data/processed/manual_prompts_30.jsonl
+  max_seq_len: 512
+
+training:
+  output_dir: outputs/qwen05b_qlora_3k_r4
+  num_train_epochs: 1
+  per_device_train_batch_size: 1
+  per_device_eval_batch_size: 1
+  gradient_accumulation_steps: 8
+  learning_rate: 2.0e-4
+  warmup_ratio: 0.03
+  weight_decay: 0.0
+  logging_steps: 10
+  eval_steps: 100
+  save_steps: 100
+  save_total_limit: 2
+  fp16: true
+  gradient_checkpointing: true
+
+lora:
+  r: 4
+  alpha: 8
+  dropout: 0.05
+  target_modules:
+    - q_proj
+    - k_proj
+    - v_proj
+    - o_proj
+    - gate_proj
+    - up_proj
+    - down_proj
+
+generation:
+  max_new_tokens: 256
+  temperature: 0.7
+  top_p: 0.9
+  do_sample: true
