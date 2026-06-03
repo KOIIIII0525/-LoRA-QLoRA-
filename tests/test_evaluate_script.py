@@ -32,6 +32,13 @@ class EvaluateScriptTest(unittest.TestCase):
 
         self.assertEqual([row["id"] for row in limited], ["sample_0", "sample_1"])
 
+    def test_rank4_1k_eval_config_uses_isolated_paths(self):
+        config = evaluate.load_config("configs/eval_rank4_1k.yaml")
+
+        self.assertEqual(config["model"]["adapter_dir"], "outputs/qwen05b_qlora_1k_r4")
+        self.assertEqual(config["outputs"]["predictions_file"], "results/predictions_qwen05b_qlora_1k_r4.jsonl")
+        self.assertEqual(config["outputs"]["metrics_file"], "results/metrics_qwen05b_qlora_1k_r4.json")
+
 
 if __name__ == "__main__":
     unittest.main()

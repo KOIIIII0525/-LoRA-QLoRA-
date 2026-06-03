@@ -17,6 +17,9 @@ ENV/
 # Jupyter
 .ipynb_checkpoints/
 
+# Agent planning artifacts
+docs/superpowers/
+
 # IDE / OS
 .vscode/
 .idea/
@@ -68,6 +71,9 @@ models/
 results/*.jsonl
 results/*.json
 results/*.csv
+results/*.log
+results/*pid*.txt
+results/chunk_logs/
 assets/*.png
 assets/*.jpg
 assets/*.jpeg

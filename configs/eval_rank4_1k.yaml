@@ -1,0 +1,26 @@
+project:
+  name: lightweight-chinese-instruction-tuning-rank4-1k
+  seed: 42
+
+model:
+  base_model_name_or_path: models/qwen2.5-0.5b-instruct
+  adapter_dir: outputs/qwen05b_qlora_1k_r4
+  trust_remote_code: true
+
+data:
+  test_file: data/processed/test_100.jsonl
+  manual_prompts_file: data/processed/manual_prompts_30.jsonl
+
+generation:
+  max_new_tokens: 256
+  temperature: 0.7
+  top_p: 0.9
+  do_sample: true
+
+metrics:
+  compute_rouge_l: true
+  compute_perplexity: true
+
+outputs:
+  predictions_file: results/predictions_qwen05b_qlora_1k_r4.jsonl
+  metrics_file: results/metrics_qwen05b_qlora_1k_r4.json

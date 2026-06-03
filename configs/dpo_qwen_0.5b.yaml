@@ -1,0 +1,76 @@
+# Lightweight DPO alignment config for Qwen2.5-0.5B after QLoRA SFT.
+
+project:
+  name: lightweight-chinese-instruction-tuning-and-preference-alignment
+  seed: 42
+
+model:
+  base_model_name_or_path: models/qwen2.5-0.5b-instruct
+  sft_adapter_dir: outputs/qwen05b_qlora_3k
+  trust_remote_code: true
+  torch_dtype: float16
+  use_qlora: true
+  load_in_4bit: true
+
+preference:
+  source_file: data/BelleGroup_sft.jsonl
+  prompt_pool_file: data/processed/preference_prompts_pool.jsonl
+  rejected_predictions_file: results/preference_rejected_qwen05b_qlora_3k.jsonl
+  rejected_field: adapter_response
+  prompt_pool_size: 500
+  exclude_prompt_files:
+    - data/processed/train_100.jsonl
+    - data/processed/train_1k.jsonl
+    - data/processed/train_3k.jsonl
+    - data/processed/valid_300.jsonl
+    - data/processed/test_100.jsonl
+    - data/processed/manual_prompts_30.jsonl
+  train_split_sizes:
+    preference_train_50: 50
+    preference_train_300: 300
+  eval_split_sizes:
+    preference_valid_100: 100
+    preference_test_100: 100
+  output_files:
+    preference_train_50: data/processed/preference_train_50.jsonl
+    preference_train_300: data/processed/preference_train_300.jsonl
+    preference_valid_100: data/processed/preference_valid_100.jsonl
+    preference_test_100: data/processed/preference_test_100.jsonl
+
+dpo:
+  output_dir: outputs/qwen05b_dpo_300
+  smoke_output_dir: outputs/qwen05b_dpo_50
+  beta: 0.1
+  num_train_epochs: 1
+  max_length: 512
+  max_prompt_length: 256
+  per_device_train_batch_size: 1
+  per_device_eval_batch_size: 1
+  gradient_accumulation_steps: 8
+  learning_rate: 5.0e-5
+  warmup_ratio: 0.03
+  logging_steps: 10
+  eval_steps: 50
+  save_steps: 50
+  save_total_limit: 2
+  fp16: false
+  gradient_checkpointing: true
+
+lora:
+  r: 8
+  alpha: 16
+  dropout: 0.05
+  target_modules:
+    - q_proj
+    - k_proj
+    - v_proj
+    - o_proj
+    - gate_proj
+    - up_proj
+    - down_proj
+
+generation:
+  max_new_tokens: 256
+  temperature: 0.7
+  top_p: 0.9
+  do_sample: true

@@ -2,34 +2,45 @@
 
 ## 项目目标
 
-本项目用于打造一个适合“小厂大模型算法实习”投递和面试讲解的个人项目。当前方向已经确定为：
+本项目是一个基于轻量开源模型的中文指令微调与偏好对齐实验。当前主线为：
 
-> 基于 LoRA / QLoRA 的中文指令微调项目。
+```text
+数据处理 -> QLoRA SFT -> 推理评估 -> 偏好数据构造 -> DPO 对齐 -> Base/SFT/DPO 对比
+```
 
-项目重点不是追求大规模训练或工业级 SOTA，而是完整跑通并讲清楚 LLM 微调的核心流程：数据处理、指令微调、评估对比、推理展示和实验复现。
+项目重点不是大规模训练，而是把低资源环境下的 LLM post-training 流程跑通、记录清楚，并保留可复现的配置、脚本和结果摘要。
 
-## 当前阶段
+## 当前状态
 
-项目已经完成第 0-5 阶段：环境确认、项目结构初始化、数据子集构造、`Qwen/Qwen2.5-0.5B-Instruct` 本地模型下载、`train_100` QLoRA smoke test、`train_1k` / `train_3k` 主实验、推理脚本、自动评估、固定 prompt 对比和人工分析。
+项目已完成 QLoRA/SFT 第一版闭环，并扩展到基于 Qwen2.5-0.5B 的中文指令微调与偏好对齐实验。
 
-当前应进入第 6 阶段：整理 GitHub 展示材料，包括 README、结果表、可复现命令、少量可提交样例和推理展示素材。除非明确要求，不要继续扩大训练规模或推进第 7 阶段加分实验。
+当前已完成：
+
+- 数据子集构造：`train_100`、`train_1k`、`train_3k`、`valid_300`、`test_100`、`manual_prompts_30`。
+- `Qwen/Qwen2.5-0.5B-Instruct` 本地模型下载。
+- `train_100` QLoRA smoke test。
+- `train_1k` / `train_3k` SFT 主实验。
+- 推理脚本、自动评估、固定 prompt 对比和人工分析。
+- DPO 偏好数据构造。
+- DPO-50 smoke test 和 DPO-300 主实验。
+- DPO 自动评估、SFT vs DPO fixed prompt 对比、preference accuracy 和人工分析。
+
+除非明确要求，不要继续扩大 SFT 训练规模，也不要把 PPO 或完整 RLHF 作为当前主线。
 
 ## 硬件约束
 
-本地机器为笔记本 RTX 3060，显存 6GB。
+本地机器为 RTX 3060 Laptop 6GB。
 
-因此默认实验设计应遵循：
+默认实验设计应遵循：
 
 - 优先使用轻量模型，例如 Qwen2.5-0.5B。
-- 第一版不使用 1.5B 作为主线模型。
-- 优先考虑 QLoRA；如果 Windows 环境不稳定，可先用 LoRA 或迁移到 WSL2/Colab。
-- 默认 `max_seq_len` 建议从 512 开始。
+- 当前主线不使用 1.5B 模型。
+- 优先考虑 QLoRA；如果 Windows 环境不稳定，可迁移到 WSL2 或 Colab。
+- 默认 `max_seq_len` 从 512 开始。
 - 默认 `per_device_train_batch_size=1`。
 - 使用梯度累积和 gradient checkpointing 控制显存。
 
-## 推荐环境与关键依赖
-
-当前仓库原始 `requirements.txt` 只覆盖了自写 Tiny LLM 训练的基础依赖，后续 LoRA/QLoRA 改造时需要更新依赖。
+## 依赖策略
 
 推荐环境：
 
@@ -55,10 +66,14 @@ MVP 必需依赖：
 
 QLoRA / 低显存相关依赖：
 
-- `bitsandbytes`：优先在 WSL2 或 Colab 使用；Windows 原生环境可能不稳定。
+- `bitsandbytes`
 - `scipy`
 
-可视化与 Demo 可选依赖：
+DPO 相关依赖：
+
+- `trl`
+
+可选依赖：
 
 - `matplotlib`
 - `pandas`
@@ -67,12 +82,12 @@ QLoRA / 低显存相关依赖：
 依赖策略：
 
 - 第一版先保证 `Qwen2.5-0.5B + LoRA/QLoRA + 3k 数据` 跑通。
-- 不要为了兼容过多环境引入复杂依赖。
+- 不为了兼容过多环境引入复杂依赖。
 - 如果 QLoRA 在 Windows 原生环境失败，优先切换到 WSL2/Colab，而不是反复修改核心训练逻辑。
 
 ## 数据规模
 
-不要使用全量 BELLE 或几十 GB 原始数据作为第一版主线。
+不要使用全量 BELLE 或几十 GB 原始数据作为当前主线。
 
 推荐数据规模：
 
@@ -83,9 +98,9 @@ QLoRA / 低显存相关依赖：
 - `test_100.jsonl`：自动评估集。
 - `manual_prompts_30.jsonl`：人工对比 prompt。
 
-如果 3k 实验稳定，再扩展到 5k 作为加分实验。
+如果 3k 实验稳定，再扩展到 5k 作为后续实验。
 
-## 推荐实验设计
+## 实验设计
 
 第一版实验矩阵：
 
@@ -103,12 +118,12 @@ QLoRA / 低显存相关依赖：
 
 ## 评估闭环
 
-项目必须体现评估闭环，不能只展示“训练成功”。
+项目必须体现评估闭环，不能只记录“训练成功”。
 
 至少包含：
 
 1. 训练指标：train loss、eval loss、perplexity。
-2. 自动指标：ROUGE-L 或 BERTScore，说明其局限。
+2. 自动指标：ROUGE-L 或 BERTScore，并说明其局限。
 3. 固定 prompt 对比：Base Model vs LoRA/QLoRA Model。
 4. 人工分析维度：
    - 指令遵循
@@ -117,75 +132,120 @@ QLoRA / 低显存相关依赖：
    - 结构化输出能力
    - 幻觉或答非所问情况
 
-## 项目表达原则
+## 表达原则
 
-简历和 README 中不要夸大为“工业级大模型训练平台”或“达到 SOTA”。
+README 和 docs 应像正常项目文档，不写个人申请或个人包装导向的表述。实验结论保持保守：
 
-推荐表达：
+- 优先说“在小规模验证集和固定 prompt 上观察到改善”。
+- 不夸大为模型能力全面提升。
+- DPO 阶段称为“小规模离线偏好对齐 / RLAIF 风格实验”。
+- 不声称完成完整 RLHF。
 
-> 在消费级显卡约束下，基于轻量开源模型完成中文指令微调、评估和推理闭环，分析小数据 SFT 对指令遵循能力的影响。
+推荐项目简介：
 
-项目一句话简介：
-
-> 基于 Qwen2.5 / TinyLlama 等轻量模型，完成中文指令数据处理、LoRA 微调、自动评估与本地推理 Demo 的端到端实验项目。
-
-简历项目描述：
-
-> 围绕中文指令跟随任务，构建轻量 LLM 微调实验流程，完成 BELLE 指令数据清洗与格式转换，基于 PEFT/LoRA 对 Qwen2.5-0.5B 进行低成本 SFT，并设计训练 loss、验证集 perplexity、ROUGE-L、固定 prompt 对比和人工样例分析等评估方式，最终提供命令行推理、可提交结果摘要和复现实验报告。
-
-注意：第一版主线仍以 `Qwen2.5-0.5B` 为主；`TinyLlama`、`Qwen2.5-1.5B`、5k 数据、rank 消融和 Gradio Demo 都属于后续对比或加分项，不能抢占最小闭环。
+> 基于 Qwen2.5 等轻量模型，完成中文指令数据处理、LoRA/QLoRA 微调、自动评估、本地推理和小规模 DPO 偏好对齐的端到端实验项目。
 
 ## 阶段路线
 
-核心目标只有一个：
+| 阶段 | 目标 | 产出 | 当前状态 |
+|---|---|---|---|
+| 第 0 阶段 | 明确环境和保护仓库 | `.gitignore`、环境记录 | 已完成 |
+| 第 1 阶段 | 项目结构初始化 | `README.md`、`configs/`、`scripts/`、`src/` | 已完成 |
+| 第 2 阶段 | 构造小数据集 | `train_100/1k/3k`、`valid_300`、`test_100` | 已完成 |
+| 第 3 阶段 | 跑通 smoke test | 100 条数据训练成功 | 已完成 |
+| 第 4 阶段 | 跑主实验 | 1k、3k LoRA/QLoRA 实验 | 已完成 |
+| 第 5 阶段 | 做评估闭环 | loss、ppl、ROUGE-L、固定 prompt 对比 | 已完成 |
+| 第 6 阶段 | 版本整理 | README、结果表、可复现命令 | 已完成 |
+| 第 7 阶段 | 扩展实验预留 | 终端推理、rank 消融预留 | 已轻量收束 |
+| 第 8 阶段 | 偏好数据构造 | preference prompt pool、chosen/rejected 数据 | 已完成 |
+| 第 9 阶段 | DPO 对齐训练 | `preference_train_50`、`preference_train_300` | 已完成 |
+| 第 10 阶段 | 三模型对比评估 | Base / SFT / DPO 自动指标、fixed prompt、preference accuracy | 已完成核心闭环 |
+
+## DPO / 偏好对齐原则
+
+第一版 DPO 不做完整人类 RLHF，也不把 PPO 作为主线。
+
+推荐路线：
 
 ```text
-先完整跑通 数据处理 -> LoRA/QLoRA 训练 -> 推理 -> 评估 -> README 展示 的最小闭环。
+chosen = BELLE 原始参考答案
+rejected = QLoRA-3k SFT adapter 生成答案
 ```
 
-| 阶段 | 目标 | 产出 | 是否必须 | 当前状态 |
-|---|---|---|---|---|
-| 第 0 阶段 | 明确环境和保护仓库 | `.gitignore`、环境记录 | 必须 | 已完成 |
-| 第 1 阶段 | 项目结构初始化 | `README.md`、`configs/`、`scripts/`、`src/` | 必须 | 已完成 |
-| 第 2 阶段 | 构造小数据集 | `train_100/1k/3k`、`valid_300`、`test_100` | 必须 | 已完成 |
-| 第 3 阶段 | 跑通 smoke test | 100 条数据训练成功 | 必须 | 已完成 |
-| 第 4 阶段 | 跑主实验 | 1k、3k LoRA/QLoRA 实验 | 必须 | 已完成 |
-| 第 5 阶段 | 做评估闭环 | loss、ppl、ROUGE-L、固定 prompt 对比 | 必须 | 已完成 |
-| 第 6 阶段 | GitHub 展示 | README、结果表、可复现命令、推理展示素材 | 必须 | 当前下一步 |
-| 第 7 阶段 | 加分实验 | 5k、rank 消融、Gradio | 可选 | 待开始 |
+偏好数据格式：
 
-## 后续改造优先级
+```json
+{
+  "id": "pref_0001",
+  "prompt": "用户指令",
+  "chosen": "参考答案",
+  "rejected": "SFT adapter 生成答案",
+  "source": "reference_vs_adapter_response"
+}
+```
 
-P0：
+DPO 阶段已完成：
 
-- 新建 `.gitignore`，排除大数据、模型权重、缓存文件。
-- 新建 `README.md`，明确项目定位。
-- 新建 `configs/`，管理训练与评估参数。
-- 新建数据处理脚本，生成 100 / 1k / 3k 子集。
-- 新建 LoRA/QLoRA 训练脚本。
-- 新建推理脚本。
+- `configs/dpo_qwen_0.5b.yaml`
+- `scripts/prepare_preference_data.py`
+- `scripts/train_dpo.py`
+- `src/preference_utils.py`
+- `src/dpo_utils.py`
+- `src/preference_eval_utils.py`
+- `scripts/evaluate_preference_accuracy.py`
+- `docs/dpo_alignment_plan.md`
+- `docs/dpo_alignment_results.md`
 
-P1：
+本地已生成但不纳入版本管理：
 
-- 新建评估脚本。
-- 生成训练曲线和实验结果表。
-- 补充固定 prompt 对比。
-- 整理推理展示素材和项目架构图。
+- `data/processed/preference_prompts_pool.jsonl`
+- `results/preference_rejected_*.jsonl`
+- `data/processed/preference_train_50.jsonl`
+- `data/processed/preference_train_300.jsonl`
+- `data/processed/preference_valid_100.jsonl`
+- `data/processed/preference_test_100.jsonl`
+- `outputs/qwen05b_dpo_50/`
+- `outputs/qwen05b_dpo_300/`
 
-P2：
+DPO 阶段 `fp16=false`，因为当前 TRL/Transformers/Accelerate/PyTorch 组合下 `fp16=true` 会触发 bfloat16 GradScaler 错误。
 
-- 做 5k 数据扩展实验。
-- 做 LoRA rank 消融。
-- 尝试 Gradio Demo。
-- 尝试 QLoRA/Colab/WSL2 兼容方案。
+DPO-300 关键结果：
+
+- 38 step。
+- train loss 约 `0.419`。
+- eval loss 约 `0.3049`。
+- eval rewards/accuracies 约 `0.93`。
+- DPO-300 在 `test_100` 上 ROUGE-L 约 `0.2436`，eval loss 约 `1.8466`，perplexity 约 `6.3381`。
+- preference accuracy：SFT 为 `0.07`，DPO 为 `0.13`。
+
+结论应保持保守：DPO 相对更偏向 chosen，但绝对准确率仍低。
+
+## Git 与文件边界
+
+不要提交：
+
+- 完整 `results/*.json/jsonl`
+- `data/processed/`
+- `outputs/`
+- `models/`
+- 模型权重和 checkpoint
+- 原始大数据
+- 缓存文件和临时文件
+
+可以提交：
+
+- 源码：`scripts/`、`src/`、`tests/`
+- 配置：`configs/`
+- 文档：`README.md`、`docs/`
+- 轻量占位文件：`assets/.gitkeep`、`data/samples/.gitkeep`、`results/.gitkeep`
 
 ## 任务管理
 
 后续推进时，优先把任务拆成 P0 / P1 / P2：
 
 - P0：决定项目能否跑通和复现的任务。
-- P1：决定项目能否写进简历、展示给面试官的任务。
-- P2：加分项，不影响第一版交付。
+- P1：明显提升项目质量和可读性的任务。
+- P2：后续加分项，不影响当前版本交付。
 
 每次开始一个新任务前，应先明确：
 
@@ -196,7 +256,7 @@ P2：
 
 除非用户明确要求，不要同时推进太多方向。优先保证一个最小闭环完整完成。
 
-## 代码审查规则
+## 审查规则
 
 后续如用户要求 review、审查、检查、把关，应默认进入代码审查视角。
 
@@ -206,64 +266,21 @@ P2：
 2. 数据路径、模型路径、输出路径是否清晰可配置。
 3. 是否存在大文件、权重、缓存误入 Git 的风险。
 4. 训练、评估、推理流程是否能独立复现。
-5. 是否有 baseline、验证集和测试集，避免只展示单次生成效果。
-6. 代码是否过度复杂，是否偏离“实习项目可讲清楚”的目标。
-7. README 和简历描述是否真实可信，避免夸大。
+5. 是否有 baseline、验证集和测试集，避免只保留单次生成效果。
+6. 代码是否过度复杂，是否偏离“能跑通、能复现、能讲清楚”的目标。
+7. README 和 docs 描述是否真实可信，避免夸大。
 
 审查输出建议使用：
 
-- P0：必须修，否则项目无法稳定跑通或容易误导面试官。
+- P0：必须修，否则项目无法稳定跑通或容易误导读者。
 - P1：建议修，会明显提升项目质量。
-- P2：可选优化，作为后续加分项。
+- P2：可选优化，作为后续扩展项。
 
-如果发现问题，应优先给出具体文件、原因和修改建议，不只给泛泛评价。
-
-## 实验审查规则
-
-后续所有实验设计都要检查是否满足闭环：
-
-1. 有明确问题：例如 1k 到 3k 数据是否提升指令遵循能力。
-2. 有可比较对象：至少包含 Base Model 和 LoRA/QLoRA Model。
-3. 有固定评估集：不要只临时挑几个好看的例子。
-4. 有自动指标：loss、ppl、ROUGE-L 或 BERTScore。
-5. 有人工分析：说明提升、失败案例和局限。
-6. 有复现实验配置：模型名、数据规模、seq length、batch size、LoRA rank、学习率、epoch。
-
-实验结论要保守表达，优先说“在小规模验证集和固定 prompt 上观察到改善”，不要说“显著超过”或“达到工业级效果”。
-
-## 典型错误记录
-
-当出现有代表性的环境、数据、训练、评估或工程复现问题时，只在 `docs/error_log.md` 简洁记录；`AGENTS.md` 不展开错误详情。
-
-## 协作方式
-
-后续对话中，默认先围绕“能跑通、能复现、能讲清楚”的目标推进。
-
-如果需要改代码，应先给出简短修改计划，再逐步修改。
-
-如果用户明确说仍在分析阶段，则只做方案讨论，不改动代码。
-
-每轮对话结束时，最终回复必须说清楚：
-
-1. 这轮具体做了什么。
-2. 验证或运行结果如何。
-3. 这些动作达成了什么项目目的。
-4. 下一步建议是什么。
+## 文档同步
 
 当完成阶段性节点、遇到代表性环境/训练/评估问题，或改变项目状态时，应同步更新相关文档：
 
 - `docs/progress.md`：记录阶段进展、当前状态、下一步。
 - `docs/error_log.md`：只记录有复盘价值的典型错误。
-- `README.md`：只在项目定位、运行方式、实验结果或展示内容发生变化时更新。
+- `README.md`：只在项目定位、运行方式、实验结果或版本管理边界发生变化时更新。
 - `AGENTS.md`：只记录长期协作规则、项目原则和阶段路线，不展开临时错误细节。
-
-当用户要求“开始实现”时，应优先从 P0 最小闭环开始：
-
-1. `.gitignore`
-2. `README.md`
-3. 数据子集构造脚本
-4. LoRA/QLoRA 训练脚本
-5. 推理脚本
-6. 评估脚本
-
-当用户要求“检查项目是否适合简历/面试”时，应从目标定位、实验设计、评估证据、可复现性和表达可信度五个方面审查。

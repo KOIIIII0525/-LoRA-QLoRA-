@@ -26,6 +26,7 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser.add_argument("--input_file", type=str, default=None, help="JSONL prompt file for batch inference.")
     parser.add_argument("--output_file", type=str, default=None, help="Output JSONL path for batch predictions.")
     parser.add_argument("--mode", choices=["base", "adapter", "both"], default="both", help="Model variant to run.")
+    parser.add_argument("--offset", type=int, default=0, help="Number of batch records to skip before limit.")
     parser.add_argument("--limit", type=int, default=None, help="Optional max records for batch inference.")
     parser.add_argument("--max_new_tokens", type=int, default=None, help="Override generation max_new_tokens.")
     parser.add_argument("--dry_run", action="store_true", help="Validate inputs without loading the model.")
@@ -46,6 +47,8 @@ def resolve_prompt_rows(config: dict[str, Any], args: argparse.Namespace) -> lis
 
     input_file = Path(args.input_file or config["data"]["manual_prompts_file"])
     rows = [normalize_prompt_record(row, index) for index, row in enumerate(load_jsonl(input_file))]
+    if args.offset:
+        rows = rows[args.offset :]
     if args.limit is not None:
         rows = rows[: args.limit]
     return rows
